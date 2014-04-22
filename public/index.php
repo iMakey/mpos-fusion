@@ -37,11 +37,13 @@ if (SECHASH_CHECK) {
 define("BASEPATH", dirname(__FILE__) . "/");
 
 // all our includes and config etc are now in bootstrap
+
 include_once(BASEPATH . '../include/bootstrap.php');
 
 // switch to https if config option is enabled
 $hts = ($config['https_only'] && (!empty($_SERVER['QUERY_STRING']))) ? "https://".$_SERVER['SERVER_NAME'].$_SERVER['SCRIPT_NAME']."?".$_SERVER['QUERY_STRING'] : "https://".$_SERVER['SERVER_NAME'].$_SERVER['SCRIPT_NAME'];
 ($config['https_only'] && @!$_SERVER['HTTPS']) ? exit(header("Location: ".$hts)):0;
+
 
 // Rate limiting, we use our initilized memcache from bootstrap/autoloader
 if ($config['memcache']['enabled'] && $config['mc_antidos']['enabled']) {

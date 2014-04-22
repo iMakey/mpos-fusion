@@ -68,6 +68,7 @@ function number_format (number, decimals, dec_point, thousands_sep) {
   }
   return s.join(dec);
 }
+<<<<<<< HEAD
 
 Number.prototype.toHHMMSS = function () {
   var sec_num = parseInt(this, 10); // don't forget the second param
@@ -81,3 +82,5 @@ Number.prototype.toHHMMSS = function () {
   var time    = hours+':'+minutes+':'+seconds;
   return time;
 }
+=======
+>>>>>>> Mainchain pplns, auxchain pps

@@ -8,10 +8,12 @@
 /templates/cache/*.php
 /templates/cache/**
 
+#/public/include/config/global.inc.php
+#/public/include/config/security.inc.php
+
 # Logs
-/cronjobs/logs
-/cronjobs/logs/**.txt.*.gz
-/logs/*
+/cronjobs/**
+/cronjobs/logs/**.txt
 
 # Test configs
 /include/config/global.inc.test.php

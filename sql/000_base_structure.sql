@@ -6,7 +6,6 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8 */;
 
-
 CREATE TABLE IF NOT EXISTS `accounts` (
   `id` int(255) NOT NULL AUTO_INCREMENT,
   `is_admin` tinyint(1) NOT NULL DEFAULT '0',
@@ -29,6 +28,8 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   `donate_percent` float DEFAULT '0',
   `ap_threshold` float DEFAULT '0',
   `coin_address` varchar(255) DEFAULT NULL,
+  `coin_address_mm` varchar(255) DEFAULT NULL,
+  `ap_threshold_mm` float DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`),
@@ -71,7 +72,25 @@ CREATE TABLE IF NOT EXISTS `invitations` (
   `is_activated` tinyint(1) NOT NULL DEFAULT '0',
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `blocks_mm` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `height` int(10) unsigned NOT NULL,
+  `blockhash` char(65) NOT NULL,
+  `confirmations` int(10) NOT NULL,
+  `amount` double NOT NULL,
+  `difficulty` double NOT NULL,
+  `time` int(11) NOT NULL,
+  `accounted` tinyint(1) NOT NULL DEFAULT '0',
+  `account_id` int(255) unsigned DEFAULT NULL,
+  `worker_name` varchar(50) DEFAULT 'unknown',
+  `shares` int(255) unsigned DEFAULT NULL,
+  `share_id` int(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `height` (`height`,`blockhash`),
+  KEY `time` (`time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Discovered blocks persisted from Litecoin Service';
 
 CREATE TABLE IF NOT EXISTS `monitoring` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -111,11 +130,20 @@ CREATE TABLE IF NOT EXISTS `notification_settings` (
   `account_id` int(11) NOT NULL,
   `active` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  KEY `account_id` (`account_id`),
-  UNIQUE KEY `account_id_type` (`account_id`,`type`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+  UNIQUE KEY `account_id_type` (`account_id`,`type`),
+  KEY `account_id` (`account_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `payouts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `account_id` int(11) NOT NULL,
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `completed` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `account_id` (`account_id`,`completed`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `payouts_mm` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL,
   `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -162,11 +190,45 @@ CREATE TABLE IF NOT EXISTS `shares` (
   KEY `our_result` (`our_result`),
   KEY `username` (`username`),
   KEY `shares_username` (`username`(10))
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `shares_mm` (
+  `id` bigint(30) NOT NULL AUTO_INCREMENT,
+  `rem_host` varchar(255) NOT NULL,
+  `username` varchar(120) NOT NULL,
+  `our_result` enum('Y','N') NOT NULL,
+  `upstream_result` enum('Y','N') DEFAULT NULL,
+  `reason` varchar(50) DEFAULT NULL,
+  `solution` varchar(257) NOT NULL,
+  `difficulty` float NOT NULL DEFAULT '0',
+  `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `time` (`time`),
+  KEY `upstream_result` (`upstream_result`),
+  KEY `our_result` (`our_result`),
+  KEY `username` (`username`),
+  KEY `shares_username` (`username`(10))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `shares_archive` (
-  `id` bigint(30) unsigned NOT NULL AUTO_INCREMENT,
-  `share_id` bigint(30) unsigned NOT NULL,
+  `id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `share_id` int(255) unsigned NOT NULL,
+  `username` varchar(120) NOT NULL,
+  `our_result` enum('Y','N') DEFAULT NULL,
+  `upstream_result` enum('Y','N') DEFAULT NULL,
+  `block_id` int(10) unsigned NOT NULL,
+  `difficulty` float NOT NULL DEFAULT '0',
+  `time` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `share_id` (`share_id`),
+  KEY `time` (`time`),
+  KEY `our_result` (`our_result`),
+  KEY `username` (`username`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Archive shares for potential later debugging purposes';
+
+CREATE TABLE IF NOT EXISTS `shares_archive_mm` (
+  `id` int(255) unsigned NOT NULL AUTO_INCREMENT,
+  `share_id` int(255) unsigned NOT NULL,
   `username` varchar(120) NOT NULL,
   `our_result` enum('Y','N') DEFAULT NULL,
   `upstream_result` enum('Y','N') DEFAULT NULL,
@@ -202,15 +264,15 @@ CREATE TABLE IF NOT EXISTS `tokens` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `token` (`token`),
   KEY `account_id` (`account_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `token_types` (
   `id` tinyint(4) unsigned NOT NULL AUTO_INCREMENT,
   `name` varchar(25) NOT NULL,
-  `expiration` INT NULL DEFAULT  '0',
+  `expiration` INT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `token_types` (`id`, `name`, `expiration`) VALUES
 (1, 'password_reset', 3600),
@@ -237,9 +299,26 @@ CREATE TABLE IF NOT EXISTS `transactions` (
   KEY `type` (`type`),
   KEY `archived` (`archived`),
   KEY `account_id_archived` (`account_id`,`archived`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `statistics_users` (
+CREATE TABLE IF NOT EXISTS `transactions_mm` (
+  `id` int(255) NOT NULL AUTO_INCREMENT,
+  `account_id` int(255) unsigned NOT NULL,
+  `type` varchar(25) DEFAULT NULL,
+  `coin_address` varchar(255) DEFAULT NULL,
+  `amount` double DEFAULT '0',
+  `block_id` int(255) DEFAULT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `txid` varchar(256) DEFAULT NULL,
+  `archived` tinyint(1) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `block_id` (`block_id`),
+  KEY `account_id` (`account_id`),
+  KEY `type` (`type`),
+  KEY `archived` (`archived`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `statistics_users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `account_id` int(11) NOT NULL,
   `hashrate` bigint(20) unsigned NOT NULL,
@@ -253,4 +332,3 @@ CREATE TABLE `statistics_users` (
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-

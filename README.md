@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Description
 ===========
 
@@ -205,3 +206,9 @@ limitations under the License.
 
   [1]: https://github.com/TheSerapher/php-mpos/issues "Issue"
   [2]: http://www.smarty.net/docs/en/ "Smarty"
+=======
+mpos-fusion
+===========
+
+mpos merged mining fork
+>>>>>>> Initial commit

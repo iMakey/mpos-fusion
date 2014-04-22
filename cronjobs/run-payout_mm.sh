@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo "Please be aware: This cron is deprecated and will be removed. Please read: https://github.com/MPOS/php-mpos/wiki/Cronjobs#setup"
-sleep 2
 
 #########################
 #                       #
@@ -12,8 +10,7 @@ sleep 2
 PHP_BIN=$( which php )
 
 # List of cruns to execute
-# findblock_mm_strict.php for pps, findblock_mm.php for pplns
-CRONS="findblock.php findblock_mm_strict.php pplns_payout.php pps_payout_mm.php blockupdate.php blockupdate_mm.php payouts.php payouts_mm.php tickerupdate.php notifications.php statistics.php tables_cleanup.php archive_cleanup_mm.php"
+CRONS="findblock_mm.php pplns_payout_mm.php blockupdate_mm.php payouts_mm.php"
 
 # Output additional runtime information
 VERBOSE="0"
@@ -24,7 +21,7 @@ BASEPATH="/tmp"
 # Subfolder for PIDFILE, so it's path will be unique in a multipool server.
 # Path relative to BASEPATH.
 # Eg. SUBFOLDER="LTC"
-SUBFOLDER=""
+SUBFOLDER="FSC_LTC"
 
 ################################################################
 #                                                              #
@@ -130,4 +127,3 @@ done
 
 # Remove pidfile
 rm -f $PIDFILE
-

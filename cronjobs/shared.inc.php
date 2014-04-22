@@ -48,6 +48,7 @@ $dStartTime = microtime(true);
 $cron_name = basename($_SERVER['PHP_SELF'], '.php');
 
 // Include our configuration (holding defines for the requires)
+
 require_once(BASEPATH . '../include/bootstrap.php');
 require_once(BASEPATH . '../include/version.inc.php');
 

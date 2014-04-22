@@ -12,7 +12,7 @@
 #/public/include/config/security.inc.php
 
 # Logs
-/cronjobs/**
+#/cronjobs/**
 /cronjobs/logs/**.txt
 
 # Test configs

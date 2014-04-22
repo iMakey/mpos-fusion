@@ -212,3 +212,4 @@ if ($setting->getValue('disable_auto_payouts') != 1 && $aAutoPayouts) {
 }
 
 require_once('cron_end.inc.php');
+
